@@ -1,0 +1,435 @@
+{% extends "base.html" %} {% block title %}スタック計算機 - Poker Tools{%
+endblock %} {% block description
+%}ポーカーのスタックをBB換算・M値に即時計算。SB・BB・アンティを入力するだけで戦略的なスタック管理が可能なオンラインツールです。{%
+endblock %} {% block content %}
+<h1 class="text-xl font-bold mb-4">スタック計算機</h1>
+
+<div>
+  <!-- PC: 2カラム / モバイル: 1カラム -->
+  <div class="md:flex md:gap-4 md:items-start space-y-3 md:space-y-0">
+    <!-- 左カラム: 入力 -->
+    <div class="md:w-72 lg:w-80 shrink-0">
+      <div
+        class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 space-y-3"
+      >
+        <!-- スタック -->
+        <div>
+          <label
+            for="stack"
+            class="block text-sm font-medium text-gray-700 mb-1"
+            >スタック</label
+          >
+          <div class="relative flex items-center">
+            <input
+              id="stack"
+              type="text"
+              inputmode="numeric"
+              placeholder="例: 10,000"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-9 text-right text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+            <button
+              id="clear-stack"
+              type="button"
+              aria-label="スタックをクリア"
+              class="absolute right-2.5 text-gray-400 hover:text-gray-600 leading-none"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- SB -->
+        <div>
+          <label for="sb" class="block text-sm font-medium text-gray-700 mb-1"
+            >SB（スモールブラインド）</label
+          >
+          <div class="relative flex items-center">
+            <input
+              id="sb"
+              type="text"
+              inputmode="numeric"
+              placeholder="例: 100"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-9 text-right text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+            <button
+              id="clear-sb"
+              type="button"
+              aria-label="SBをクリア"
+              class="absolute right-2.5 text-gray-400 hover:text-gray-600 leading-none"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- BB -->
+        <div>
+          <label for="bb" class="block text-sm font-medium text-gray-700 mb-1"
+            >BB（ビッグブラインド）</label
+          >
+          <div class="relative flex items-center">
+            <input
+              id="bb"
+              type="text"
+              inputmode="numeric"
+              placeholder="例: 200"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-9 text-right text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+            <button
+              id="clear-bb"
+              type="button"
+              aria-label="BBをクリア"
+              class="absolute right-2.5 text-gray-400 hover:text-gray-600 leading-none"
+            >
+              ✕
+            </button>
+          </div>
+          <p id="bb-error" class="hidden mt-1 text-xs text-red-600">
+            BBは1以上の値を入力してください。
+          </p>
+        </div>
+
+        <!-- アンティ -->
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input id="ante" type="checkbox" class="w-4 h-4 accent-indigo-600" />
+          <span class="text-sm font-medium text-gray-700"
+            >アンティあり（BB額と同額）</span
+          >
+        </label>
+      </div>
+    </div>
+
+    <!-- 右カラム: スタック調整 → 計算結果 -->
+    <div class="flex-1 space-y-3">
+      <!-- スタック調整 -->
+      <div
+        class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 space-y-2"
+      >
+        <p class="text-sm font-semibold text-gray-700">スタック調整</p>
+
+        <!-- SB行 -->
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            id="btn-sub-sb"
+            type="button"
+            class="rounded-lg bg-rose-100 hover:bg-rose-200 active:bg-rose-300 py-2 text-sm font-semibold text-rose-700 transition-colors"
+          >
+            − SB
+          </button>
+          <button
+            id="btn-add-sb"
+            type="button"
+            class="rounded-lg bg-emerald-100 hover:bg-emerald-200 active:bg-emerald-300 py-2 text-sm font-semibold text-emerald-700 transition-colors"
+          >
+            + SB
+          </button>
+        </div>
+
+        <!-- BB行 -->
+        <div class="grid grid-cols-2 gap-2">
+          <button
+            id="btn-sub-bb"
+            type="button"
+            class="rounded-lg bg-rose-100 hover:bg-rose-200 active:bg-rose-300 py-2 text-sm font-semibold text-rose-700 transition-colors"
+          >
+            − BB
+          </button>
+          <button
+            id="btn-add-bb"
+            type="button"
+            class="rounded-lg bg-emerald-100 hover:bg-emerald-200 active:bg-emerald-300 py-2 text-sm font-semibold text-emerald-700 transition-colors"
+          >
+            + BB
+          </button>
+        </div>
+
+        <!-- BB+アンティ行（アンティON時のみ表示） -->
+        <div id="ante-adjust" class="hidden">
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              id="btn-sub-bbante"
+              type="button"
+              class="rounded-lg bg-rose-100 hover:bg-rose-200 active:bg-rose-300 py-2 text-sm font-semibold text-rose-700 transition-colors"
+            >
+              − (BB+アンティ)
+            </button>
+            <button
+              id="btn-add-bbante"
+              type="button"
+              class="rounded-lg bg-emerald-100 hover:bg-emerald-200 active:bg-emerald-300 py-2 text-sm font-semibold text-emerald-700 transition-colors"
+            >
+              + (BB+アンティ)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 計算結果 -->
+      <div class="grid grid-cols-2 gap-3">
+        <!-- BB換算 -->
+        <div
+          class="bg-indigo-50 border border-indigo-200 rounded-xl p-3 text-center"
+        >
+          <p
+            class="text-xs font-semibold text-indigo-500 uppercase tracking-wider mb-1"
+          >
+            BB換算
+          </p>
+          <p id="bb-result" class="text-xl font-bold text-indigo-800">---</p>
+          <p class="text-xs text-indigo-400 mt-0.5">BB</p>
+        </div>
+
+        <!-- M値 -->
+        <div
+          id="m-card"
+          class="bg-gray-50 border border-gray-200 rounded-xl p-3 text-center transition-all duration-200"
+        >
+          <p
+            id="m-label"
+            class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1"
+          >
+            M値
+          </p>
+          <p id="m-result" class="text-xl font-bold text-gray-800">---</p>
+          <p id="m-zone" class="text-xs text-gray-400 mt-0.5">&nbsp;</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 全リセット（常に最下部） -->
+  <div class="mt-3">
+    <button
+      id="btn-reset"
+      type="button"
+      class="w-full rounded-xl bg-gray-200 hover:bg-gray-300 active:bg-gray-400 py-2 text-sm font-semibold text-gray-700 transition-colors"
+    >
+      全リセット
+    </button>
+  </div>
+</div>
+
+<!-- Tailwind動的クラス（JS で付与するクラスを CDN に認識させるため） -->
+<div
+  class="hidden bg-green-50 border-green-300 text-green-800 text-green-700 text-green-600 bg-yellow-50 border-yellow-300 text-yellow-800 text-yellow-700 text-yellow-600 bg-orange-50 border-orange-300 text-orange-800 text-orange-700 text-orange-600 bg-red-50 border-red-300 text-red-800 text-red-700 text-red-600"
+></div>
+
+{% endblock %} {% block scripts %}
+<script>
+  (function () {
+    // ---- ユーティリティ ----
+    function parseNum(val) {
+      const n = parseInt(val.replace(/[,，\s]/g, ""), 10);
+      return isNaN(n) ? null : n;
+    }
+
+    function formatNum(val) {
+      const raw = val.replace(/[^\d]/g, "");
+      if (!raw) return "";
+      return parseInt(raw, 10).toLocaleString("ja-JP");
+    }
+
+    // ---- 要素取得 ----
+    const stackEl = document.getElementById("stack");
+    const sbEl = document.getElementById("sb");
+    const bbEl = document.getElementById("bb");
+    const anteEl = document.getElementById("ante");
+    const bbError = document.getElementById("bb-error");
+    const bbResult = document.getElementById("bb-result");
+    const mCard = document.getElementById("m-card");
+    const mLabel = document.getElementById("m-label");
+    const mResult = document.getElementById("m-result");
+    const mZone = document.getElementById("m-zone");
+    const anteAdjust = document.getElementById("ante-adjust");
+
+    // ---- 数値フォーマット（入力中にカンマ区切り） ----
+    [stackEl, sbEl, bbEl].forEach(function (el) {
+      el.addEventListener("input", function () {
+        const fromEnd = this.value.length - this.selectionStart;
+        this.value = formatNum(this.value);
+        const newPos = Math.max(0, this.value.length - fromEnd);
+        this.setSelectionRange(newPos, newPos);
+        calculate();
+      });
+    });
+
+    // ---- アンティ切り替え ----
+    anteEl.addEventListener("change", function () {
+      anteAdjust.classList.toggle("hidden", !this.checked);
+      calculate();
+    });
+
+    // ---- 個別クリアボタン ----
+    document
+      .getElementById("clear-stack")
+      .addEventListener("click", function () {
+        stackEl.value = "";
+        calculate();
+      });
+    document.getElementById("clear-sb").addEventListener("click", function () {
+      sbEl.value = "";
+      calculate();
+    });
+    document.getElementById("clear-bb").addEventListener("click", function () {
+      bbEl.value = "";
+      calculate();
+    });
+
+    // ---- スタック調整 ----
+    function adjustStack(dir, unit) {
+      const sb = parseNum(sbEl.value);
+      const bb = parseNum(bbEl.value);
+      const ante = anteEl.checked;
+
+      let amount = 0;
+      if (unit === "sb" && sb !== null) amount = sb;
+      if (unit === "bb" && bb !== null) amount = bb;
+      if (unit === "bbante" && bb !== null) amount = bb + (ante ? bb : 0);
+      if (amount === 0) return;
+
+      const current = parseNum(stackEl.value) ?? 0;
+      stackEl.value = formatNum(String(Math.max(0, current + dir * amount)));
+      calculate();
+    }
+
+    document
+      .getElementById("btn-sub-sb")
+      .addEventListener("click", function () {
+        adjustStack(-1, "sb");
+      });
+    document
+      .getElementById("btn-add-sb")
+      .addEventListener("click", function () {
+        adjustStack(1, "sb");
+      });
+    document
+      .getElementById("btn-sub-bb")
+      .addEventListener("click", function () {
+        adjustStack(-1, "bb");
+      });
+    document
+      .getElementById("btn-add-bb")
+      .addEventListener("click", function () {
+        adjustStack(1, "bb");
+      });
+    document
+      .getElementById("btn-sub-bbante")
+      .addEventListener("click", function () {
+        adjustStack(-1, "bbante");
+      });
+    document
+      .getElementById("btn-add-bbante")
+      .addEventListener("click", function () {
+        adjustStack(1, "bbante");
+      });
+
+    // ---- 全リセット ----
+    document.getElementById("btn-reset").addEventListener("click", function () {
+      stackEl.value = "";
+      sbEl.value = "";
+      bbEl.value = "";
+      anteEl.checked = false;
+      anteAdjust.classList.add("hidden");
+      bbError.classList.add("hidden");
+      bbResult.textContent = "---";
+      resetMCard();
+    });
+
+    // ---- 計算 ----
+    function calculate() {
+      const stack = parseNum(stackEl.value);
+      const sb = parseNum(sbEl.value);
+      const bb = parseNum(bbEl.value);
+      const ante = anteEl.checked;
+
+      // BB バリデーション
+      if (bb !== null && bb <= 0) {
+        bbError.classList.remove("hidden");
+        bbResult.textContent = "---";
+        resetMCard();
+        return;
+      }
+      bbError.classList.add("hidden");
+
+      // BB 換算
+      if (stack !== null && bb !== null) {
+        bbResult.textContent = (stack / bb).toFixed(1);
+      } else {
+        bbResult.textContent = "---";
+      }
+
+      // M 値
+      if (stack !== null && sb !== null && bb !== null) {
+        const anteAmt = ante ? bb : 0;
+        const pot = sb + bb + anteAmt;
+        const m = stack / pot;
+        mResult.textContent = m.toFixed(1);
+        applyMZone(m);
+      } else {
+        resetMCard();
+      }
+    }
+
+    // ---- M 値ゾーン定義 ----
+    const ZONES = [
+      {
+        min: 20,
+        cardCls: "bg-green-50 border-green-300",
+        resultCls: "text-green-800",
+        labelCls: "text-green-700",
+        zoneCls: "text-green-600",
+        name: "通常プレイ可",
+      },
+      {
+        min: 10,
+        cardCls: "bg-yellow-50 border-yellow-300",
+        resultCls: "text-yellow-800",
+        labelCls: "text-yellow-700",
+        zoneCls: "text-yellow-600",
+        name: "アグレッシブなプレイを推奨",
+      },
+      {
+        min: 5,
+        cardCls: "bg-orange-50 border-orange-300",
+        resultCls: "text-orange-800",
+        labelCls: "text-orange-700",
+        zoneCls: "text-orange-600",
+        name: "プッシュ/フォールド圏内",
+      },
+      {
+        min: 0,
+        cardCls: "bg-red-50 border-red-300",
+        resultCls: "text-red-800",
+        labelCls: "text-red-700",
+        zoneCls: "text-red-600",
+        name: "危機的な状況",
+      },
+    ];
+
+    function applyMZone(m) {
+      const z = ZONES.find(function (z) {
+        return m >= z.min;
+      });
+      mCard.className =
+        "rounded-xl p-3 text-center transition-all duration-200 border " +
+        z.cardCls;
+      mResult.className = "text-xl font-bold " + z.resultCls;
+      mLabel.className =
+        "text-xs font-semibold uppercase tracking-wider mb-1 " + z.labelCls;
+      mZone.className = "text-xs mt-0.5 " + z.zoneCls;
+      mZone.textContent = z.name;
+    }
+
+    function resetMCard() {
+      mCard.className =
+        "bg-gray-50 border border-gray-200 rounded-xl p-3 text-center transition-all duration-200";
+      mResult.className = "text-xl font-bold text-gray-800";
+      mLabel.className =
+        "text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1";
+      mZone.className = "text-xs text-gray-400 mt-0.5";
+      mZone.innerHTML = "&nbsp;";
+      mResult.textContent = "---";
+    }
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %} {% block title %}Poker Tools{% endblock %} {% block
+description
+%}ポーカープレイヤーのための便利ツール集。BB換算・M値計算など、テーブルでの戦略的判断をサポートするツールを無料で提供しています。{%
+endblock %} {% block content %}
+<div>
+  <h1 class="text-xl font-bold mb-1">ツール一覧</h1>
+  <p class="text-sm text-gray-500 mb-4">使いたいツールを選択してください。</p>
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+    <!-- スタック計算機 -->
+    <a
+      href="{{ url_for('stack_calculator') }}"
+      class="block bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md hover:border-indigo-300 transition-all group"
+    >
+      <div
+        class="w-9 h-9 bg-indigo-100 rounded-lg flex items-center justify-center mb-2"
+      >
+        <span class="text-indigo-700 font-bold text-sm">BB</span>
+      </div>
+      <h2
+        class="font-bold text-gray-800 mb-1 group-hover:text-indigo-700 transition-colors"
+      >
+        スタック計算機
+      </h2>
+      <p class="text-sm text-gray-500">
+        BB換算・M値をリアルタイムで計算し、戦略的判断をサポート。
+      </p>
+    </a>
+  </div>
+</div>
+{% endblock %}

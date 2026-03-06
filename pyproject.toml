@@ -1,0 +1,18 @@
+[project]
+name = "poker-tools"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "hiro16131104",email = "hiro931104@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flask (>=3.1.3,<4.0.0)",
+    "gunicorn (>=25.1.0,<26.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

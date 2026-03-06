@@ -1,0 +1,131 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Poker Tools - Flask on Lambda (Lambda Web Adapter) + API Gateway REST
+
+# ==============================================================
+# パラメータ
+# ==============================================================
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues: [dev, prod]
+    Default: dev
+    Description: デプロイ先の環境
+
+# ==============================================================
+# グローバル設定（全 Lambda 関数に適用）
+# ==============================================================
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Architectures:
+      - arm64
+
+# ==============================================================
+# リソース
+# ==============================================================
+Resources:
+
+  # ── Lambda 関数 ──────────────────────────────────────────────
+  PokerToolsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "poker-tools-${Environment}"
+      PackageType: Image
+      Environment:
+        Variables:
+          PORT: "8080"
+          # LWA がアプリの起動完了を確認するパス
+          AWS_LWA_READINESS_CHECK_PATH: "/"
+      Events:
+        # ルートパス（/）
+        RootPath:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PokerToolsApi
+            Path: /
+            Method: ANY
+        # それ以外の全パス
+        ProxyPath:
+          Type: Api
+          Properties:
+            RestApiId: !Ref PokerToolsApi
+            Path: /{proxy+}
+            Method: ANY
+    Metadata:
+      DockerTag: latest
+      DockerContext: ./
+      Dockerfile: Dockerfile
+
+  # ── CloudWatch Logs（ログ保持期間を明示管理）────────────────
+  PokerToolsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/poker-tools-${Environment}"
+      RetentionInDays: !If [IsProd, 90, 14]
+
+  # ── API Gateway REST API ─────────────────────────────────────
+  PokerToolsApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "poker-tools-api-${Environment}"
+      StageName: !Ref Environment
+      EndpointConfiguration:
+        Type: REGIONAL
+      # ── (将来) Route53 カスタムドメイン設定 ─────────────────
+      # Route53 でドメインを関連付ける場合は以下のリソースを追加:
+      #
+      # 1. ACM 証明書（ap-northeast-1 リージョンで発行）
+      #    Type: AWS::CertificateManager::Certificate
+      #
+      # 2. API Gateway カスタムドメイン名
+      #    Type: AWS::ApiGateway::DomainName
+      #    Properties:
+      #      DomainName: poker-tools.example.com  （または dev.poker-tools.example.com）
+      #      RegionalCertificateArn: !Ref Certificate
+      #      EndpointConfiguration:
+      #        Types: [REGIONAL]
+      #
+      # 3. API マッピング
+      #    Type: AWS::ApiGateway::BasePathMapping
+      #    Properties:
+      #      DomainName: !Ref CustomDomain
+      #      RestApiId: !Ref PokerToolsApi
+      #      Stage: !Ref Environment
+      #
+      # 4. Route53 レコード（エイリアス）
+      #    Type: AWS::Route53::RecordSet
+      #    Properties:
+      #      HostedZoneId: <HostedZoneId>
+      #      Name: poker-tools.example.com
+      #      Type: A
+      #      AliasTarget:
+      #        DNSName: !GetAtt CustomDomain.RegionalDomainName
+      #        HostedZoneId: !GetAtt CustomDomain.RegionalHostedZoneId
+
+# ==============================================================
+# 条件
+# ==============================================================
+Conditions:
+  IsProd: !Equals [!Ref Environment, prod]
+
+# ==============================================================
+# 出力
+# ==============================================================
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway エンドポイント URL（ステージプレフィックスあり）
+    Value: !Sub "https://${PokerToolsApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/"
+    Export:
+      Name: !Sub "poker-tools-${Environment}-api-endpoint"
+
+  LambdaFunctionArn:
+    Description: Lambda 関数 ARN
+    Value: !GetAtt PokerToolsFunction.Arn
+    Export:
+      Name: !Sub "poker-tools-${Environment}-function-arn"
+
+  LambdaFunctionName:
+    Description: Lambda 関数名
+    Value: !Ref PokerToolsFunction

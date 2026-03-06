@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Poker Tools{% endblock %}</title>
+    <meta
+      name="description"
+      content="{% block description %}ポーカープレイヤーのための便利ツール集。BB換算・M値計算など、テーブルでの戦略的判断をサポートします。{% endblock %}"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Noto Sans JP"', "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    {% block head %}{% endblock %}
+  </head>
+  <body class="font-sans flex flex-col min-h-screen bg-gray-50 text-gray-800">
+    <header class="bg-gray-900 text-white px-4 py-2.5">
+      <nav>
+        <div class="flex items-center justify-between">
+          <a
+            href="{{ url_for('index') }}"
+            class="text-base font-bold tracking-wide hover:text-gray-300 transition-colors"
+            >Poker Tools</a
+          >
+          <!-- デスクトップ: 横並びリンク -->
+          <div class="hidden sm:flex items-center gap-6">
+            <a
+              href="{{ url_for('stack_calculator') }}"
+              class="text-sm text-gray-300 hover:text-white transition-colors"
+              >スタック計算機</a
+            >
+          </div>
+          <!-- モバイル: ハンバーガーボタン -->
+          <button
+            id="menu-btn"
+            type="button"
+            aria-label="メニューを開く"
+            aria-expanded="false"
+            class="sm:hidden p-1.5 rounded-md text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"
+          >
+            <svg
+              id="icon-open"
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+            <svg
+              id="icon-close"
+              class="w-5 h-5 hidden"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+        <!-- モバイル: ドロップダウンメニュー -->
+        <div
+          id="mobile-menu"
+          class="hidden sm:hidden mt-2 pb-1 border-t border-gray-700 pt-2 space-y-1"
+        >
+          <a
+            href="{{ url_for('stack_calculator') }}"
+            class="block text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-md px-3 py-2 transition-colors"
+            >スタック計算機</a
+          >
+        </div>
+      </nav>
+    </header>
+    <script>
+      (function () {
+        const btn = document.getElementById("menu-btn");
+        const menu = document.getElementById("mobile-menu");
+        const iconOpen = document.getElementById("icon-open");
+        const iconClose = document.getElementById("icon-close");
+        btn.addEventListener("click", function () {
+          const open = menu.classList.toggle("hidden");
+          btn.setAttribute("aria-expanded", String(!open));
+          iconOpen.classList.toggle("hidden", !open);
+          iconClose.classList.toggle("hidden", open);
+        });
+      })();
+    </script>
+
+    <main class="flex-1 w-full max-w-5xl mx-auto px-4 py-5">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-100 text-center text-sm text-gray-500 py-4">
+      <p>&copy; 2026 Poker Tools</p>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
