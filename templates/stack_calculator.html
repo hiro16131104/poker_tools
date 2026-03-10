@@ -91,7 +91,12 @@ endblock %} {% block content %}
 
         <!-- アンティ -->
         <label class="flex items-center gap-2 cursor-pointer select-none">
-          <input id="ante" type="checkbox" class="w-4 h-4 accent-indigo-600" />
+          <input
+            id="ante"
+            type="checkbox"
+            class="w-4 h-4 accent-indigo-600"
+            checked
+          />
           <span class="text-sm font-medium text-gray-700"
             >アンティあり（BB額と同額）</span
           >
@@ -144,7 +149,7 @@ endblock %} {% block content %}
         </div>
 
         <!-- BB+アンティ行（アンティON時のみ表示） -->
-        <div id="ante-adjust" class="hidden">
+        <div id="ante-adjust">
           <div class="grid grid-cols-2 gap-2">
             <button
               id="btn-sub-bbante"
@@ -216,18 +221,18 @@ endblock %} {% block content %}
 
 {% endblock %} {% block scripts %}
 <script>
-  (function () {
+  (() => {
     // ---- ユーティリティ ----
-    function parseNum(val) {
+    const parseNum = (val) => {
       const n = parseInt(val.replace(/[,，\s]/g, ""), 10);
       return isNaN(n) ? null : n;
-    }
+    };
 
-    function formatNum(val) {
+    const formatNum = (val) => {
       const raw = val.replace(/[^\d]/g, "");
       if (!raw) return "";
       return parseInt(raw, 10).toLocaleString("ja-JP");
-    }
+    };
 
     // ---- 要素取得 ----
     const stackEl = document.getElementById("stack");
@@ -243,7 +248,7 @@ endblock %} {% block content %}
     const anteAdjust = document.getElementById("ante-adjust");
 
     // ---- 数値フォーマット（入力中にカンマ区切り） ----
-    [stackEl, sbEl, bbEl].forEach(function (el) {
+    [stackEl, sbEl, bbEl].forEach((el) => {
       el.addEventListener("input", function () {
         const fromEnd = this.value.length - this.selectionStart;
         this.value = formatNum(this.value);
@@ -254,93 +259,70 @@ endblock %} {% block content %}
     });
 
     // ---- アンティ切り替え ----
-    anteEl.addEventListener("change", function () {
-      anteAdjust.classList.toggle("hidden", !this.checked);
+    anteEl.addEventListener("change", () => {
+      anteAdjust.classList.toggle("hidden", !anteEl.checked);
       calculate();
     });
 
     // ---- 個別クリアボタン ----
-    document
-      .getElementById("clear-stack")
-      .addEventListener("click", function () {
-        stackEl.value = "";
+    [
+      { id: "clear-stack", el: stackEl },
+      { id: "clear-sb", el: sbEl },
+      { id: "clear-bb", el: bbEl },
+    ].forEach(({ id, el }) => {
+      document.getElementById(id).addEventListener("click", () => {
+        el.value = "";
         calculate();
       });
-    document.getElementById("clear-sb").addEventListener("click", function () {
-      sbEl.value = "";
-      calculate();
-    });
-    document.getElementById("clear-bb").addEventListener("click", function () {
-      bbEl.value = "";
-      calculate();
     });
 
     // ---- スタック調整 ----
-    function adjustStack(dir, unit) {
+    const adjustStack = (dir, unit) => {
       const sb = parseNum(sbEl.value);
       const bb = parseNum(bbEl.value);
-      const ante = anteEl.checked;
 
       let amount = 0;
       if (unit === "sb" && sb !== null) amount = sb;
       if (unit === "bb" && bb !== null) amount = bb;
-      if (unit === "bbante" && bb !== null) amount = bb + (ante ? bb : 0);
+      if (unit === "bbante" && bb !== null)
+        amount = bb + (anteEl.checked ? bb : 0);
       if (amount === 0) return;
 
       const current = parseNum(stackEl.value) ?? 0;
       stackEl.value = formatNum(String(Math.max(0, current + dir * amount)));
       calculate();
-    }
+    };
 
-    document
-      .getElementById("btn-sub-sb")
-      .addEventListener("click", function () {
-        adjustStack(-1, "sb");
-      });
-    document
-      .getElementById("btn-add-sb")
-      .addEventListener("click", function () {
-        adjustStack(1, "sb");
-      });
-    document
-      .getElementById("btn-sub-bb")
-      .addEventListener("click", function () {
-        adjustStack(-1, "bb");
-      });
-    document
-      .getElementById("btn-add-bb")
-      .addEventListener("click", function () {
-        adjustStack(1, "bb");
-      });
-    document
-      .getElementById("btn-sub-bbante")
-      .addEventListener("click", function () {
-        adjustStack(-1, "bbante");
-      });
-    document
-      .getElementById("btn-add-bbante")
-      .addEventListener("click", function () {
-        adjustStack(1, "bbante");
-      });
+    [
+      { id: "btn-sub-sb", dir: -1, unit: "sb" },
+      { id: "btn-add-sb", dir: 1, unit: "sb" },
+      { id: "btn-sub-bb", dir: -1, unit: "bb" },
+      { id: "btn-add-bb", dir: 1, unit: "bb" },
+      { id: "btn-sub-bbante", dir: -1, unit: "bbante" },
+      { id: "btn-add-bbante", dir: 1, unit: "bbante" },
+    ].forEach(({ id, dir, unit }) => {
+      document
+        .getElementById(id)
+        .addEventListener("click", () => adjustStack(dir, unit));
+    });
 
     // ---- 全リセット ----
-    document.getElementById("btn-reset").addEventListener("click", function () {
+    document.getElementById("btn-reset").addEventListener("click", () => {
       stackEl.value = "";
       sbEl.value = "";
       bbEl.value = "";
-      anteEl.checked = false;
-      anteAdjust.classList.add("hidden");
+      anteEl.checked = true;
+      anteAdjust.classList.remove("hidden");
       bbError.classList.add("hidden");
       bbResult.textContent = "---";
       resetMCard();
     });
 
     // ---- 計算 ----
-    function calculate() {
+    const calculate = () => {
       const stack = parseNum(stackEl.value);
       const sb = parseNum(sbEl.value);
       const bb = parseNum(bbEl.value);
-      const ante = anteEl.checked;
 
       // BB バリデーション
       if (bb !== null && bb <= 0) {
@@ -352,23 +334,19 @@ endblock %} {% block content %}
       bbError.classList.add("hidden");
 
       // BB 換算
-      if (stack !== null && bb !== null) {
-        bbResult.textContent = (stack / bb).toFixed(1);
-      } else {
-        bbResult.textContent = "---";
-      }
+      bbResult.textContent =
+        stack !== null && bb !== null ? (stack / bb).toFixed(1) : "---";
 
       // M 値
       if (stack !== null && sb !== null && bb !== null) {
-        const anteAmt = ante ? bb : 0;
-        const pot = sb + bb + anteAmt;
+        const pot = sb + bb + (anteEl.checked ? bb : 0);
         const m = stack / pot;
         mResult.textContent = m.toFixed(1);
         applyMZone(m);
       } else {
         resetMCard();
       }
-    }
+    };
 
     // ---- M 値ゾーン定義 ----
     const ZONES = [
@@ -406,21 +384,16 @@ endblock %} {% block content %}
       },
     ];
 
-    function applyMZone(m) {
-      const z = ZONES.find(function (z) {
-        return m >= z.min;
-      });
-      mCard.className =
-        "rounded-xl p-3 text-center transition-all duration-200 border " +
-        z.cardCls;
-      mResult.className = "text-xl font-bold " + z.resultCls;
-      mLabel.className =
-        "text-xs font-semibold uppercase tracking-wider mb-1 " + z.labelCls;
-      mZone.className = "text-xs mt-0.5 " + z.zoneCls;
+    const applyMZone = (m) => {
+      const z = ZONES.find((z) => m >= z.min);
+      mCard.className = `rounded-xl p-3 text-center transition-all duration-200 border ${z.cardCls}`;
+      mResult.className = `text-xl font-bold ${z.resultCls}`;
+      mLabel.className = `text-xs font-semibold uppercase tracking-wider mb-1 ${z.labelCls}`;
+      mZone.className = `text-xs mt-0.5 ${z.zoneCls}`;
       mZone.textContent = z.name;
-    }
+    };
 
-    function resetMCard() {
+    const resetMCard = () => {
       mCard.className =
         "bg-gray-50 border border-gray-200 rounded-xl p-3 text-center transition-all duration-200";
       mResult.className = "text-xl font-bold text-gray-800";
@@ -429,7 +402,7 @@ endblock %} {% block content %}
       mZone.className = "text-xs text-gray-400 mt-0.5";
       mZone.innerHTML = "&nbsp;";
       mResult.textContent = "---";
-    }
+    };
   })();
 </script>
 {% endblock %}

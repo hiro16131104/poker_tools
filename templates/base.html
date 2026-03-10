@@ -96,13 +96,22 @@
         </div>
       </nav>
     </header>
+
+    <main class="flex-1 w-full max-w-5xl mx-auto px-4 py-5">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="text-center text-xs text-gray-300 py-3">
+      <p>&copy; 2026 Poker Tools</p>
+    </footer>
+
     <script>
-      (function () {
+      (() => {
         const btn = document.getElementById("menu-btn");
         const menu = document.getElementById("mobile-menu");
         const iconOpen = document.getElementById("icon-open");
         const iconClose = document.getElementById("icon-close");
-        btn.addEventListener("click", function () {
+        btn.addEventListener("click", () => {
           const open = menu.classList.toggle("hidden");
           btn.setAttribute("aria-expanded", String(!open));
           iconOpen.classList.toggle("hidden", !open);
@@ -110,15 +119,6 @@
         });
       })();
     </script>
-
-    <main class="flex-1 w-full max-w-5xl mx-auto px-4 py-5">
-      {% block content %}{% endblock %}
-    </main>
-
-    <footer class="bg-gray-100 text-center text-sm text-gray-500 py-4">
-      <p>&copy; 2026 Poker Tools</p>
-    </footer>
-
     {% block scripts %}{% endblock %}
   </body>
 </html>
