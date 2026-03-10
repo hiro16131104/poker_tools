@@ -36,6 +36,7 @@ Resources:
       Environment:
         Variables:
           PORT: "8080"
+          APP_ENV: !Ref Environment
           # LWA がアプリの起動完了を確認するパス
           AWS_LWA_READINESS_CHECK_PATH: "/"
       Events:

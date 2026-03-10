@@ -1,6 +1,14 @@
+import os
+from typing import Any
+
 from flask import Flask, render_template
 
 app: Flask = Flask(__name__)
+
+
+@app.context_processor
+def inject_env() -> dict[str, Any]:
+    return {"app_env": os.environ.get("APP_ENV", "dev")}
 
 
 @app.route("/")
