@@ -21,8 +21,8 @@ Thumbs.db
 # Flask
 instance/
 
-# Poetry
-poetry.lock
+# SAM ビルド成果物
+.aws-sam/
 
 # Claude
 .claude/
