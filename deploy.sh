@@ -28,6 +28,21 @@ if [[ "$ENV" != "local" && "$ENV" != "dev" && "$ENV" != "prod" ]]; then
     exit 1
 fi
 
+# ── コードフォーマット ───────────────────────────────────────────
+echo "======================================================"
+echo "  コードフォーマット"
+echo "======================================================"
+echo ""
+echo "[0/2] isort & black を実行..."
+poetry run isort .
+poetry run black .
+echo "      OK"
+echo ""
+echo "[0/2] flake8 を実行..."
+poetry run flake8 .
+echo "      OK"
+echo ""
+
 # ── ローカル起動 ─────────────────────────────────────────────────
 if [[ "$ENV" == "local" ]]; then
     IMAGE_NAME="poker-tools-local"

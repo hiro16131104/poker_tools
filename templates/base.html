@@ -39,7 +39,10 @@
               >Poker Tools</a
             >
             {% if app_env == "dev" %}
-            <span class="text-xs font-semibold bg-yellow-400 text-yellow-900 rounded px-1.5 py-0.5 leading-none">DEV</span>
+            <span
+              class="text-xs font-semibold bg-yellow-400 text-yellow-900 rounded px-1.5 py-0.5 leading-none"
+              >DEV</span
+            >
             {% endif %}
           </div>
           <!-- デスクトップ: 横並びリンク -->
@@ -102,7 +105,7 @@
       </nav>
     </header>
 
-    <main class="flex-1 w-full max-w-5xl mx-auto px-4 py-5">
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 py-5">
       {% block content %}{% endblock %}
     </main>
 
@@ -110,20 +113,7 @@
       <p>&copy; 2026 Poker Tools</p>
     </footer>
 
-    <script>
-      (() => {
-        const btn = document.getElementById("menu-btn");
-        const menu = document.getElementById("mobile-menu");
-        const iconOpen = document.getElementById("icon-open");
-        const iconClose = document.getElementById("icon-close");
-        btn.addEventListener("click", () => {
-          const open = menu.classList.toggle("hidden");
-          btn.setAttribute("aria-expanded", String(!open));
-          iconOpen.classList.toggle("hidden", !open);
-          iconClose.classList.toggle("hidden", open);
-        });
-      })();
-    </script>
+    <script src="{{ url_for('static', filename='js/base.js') }}" defer></script>
     {% block scripts %}{% endblock %}
   </body>
 </html>
