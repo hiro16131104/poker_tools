@@ -114,7 +114,7 @@ version = "1.2.4"
 description = "Flake8 plug-in loading the configuration from pyproject.toml"
 optional = false
 python-versions = ">=3.6"
-groups = ["main", "dev"]
+groups = ["dev"]
 files = [
     {file = "flake8_pyproject-1.2.4-py3-none-any.whl", hash = "sha256:ea34c057f9a9329c76d98723bb2bb498cc6ba8ff9872c4d19932d48c91249a77"},
 ]
@@ -482,4 +482,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "b371d1b9b64b6ec2142a48773f4df25084275d55e325ff96cfa304bc54f05b32"
+content-hash = "affa46633bf9fa7aeb80beeadc298ebce4664318a0be131e2628c0a00b1b4900"
