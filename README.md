@@ -10,6 +10,14 @@
 - M値に応じたゾーン表示（通常 / 要アグレッション / プッシュフォールド / 危機的）
 - アンティのON/OFF状態をブラウザに保存
 
+### エクイティ計算機
+- ヒーローハンド vs 相手レンジのエクイティをモンテカルロ法で計算
+- 1〜2人の相手に対応
+- フロップ・ターン・リバーのボードカード指定可能
+- 13×13レンジマトリクスでドラッグ操作によるレンジ選択
+- プリセットボタン（上位5% / 10% / 20% / 30%）
+- 勝率・チョップ率・エクイティを表示
+
 ## 技術スタック
 
 | 項目 | 内容 |
@@ -49,6 +57,12 @@ poetry run flask run
 
 `http://localhost:8080` で確認できます。
 
+## テスト
+
+```bash
+poetry run pytest
+```
+
 ## デプロイ
 
 ### 前提条件
@@ -73,14 +87,27 @@ poetry run flask run
 ```
 poker_tools/
 ├── app.py                  # Flask アプリ・ルーティング
+├── equity/
+│   ├── calculator.py       # モンテカルロ法によるエクイティ計算
+│   ├── evaluator.py        # 7枚手札のハンド評価（NumPy ベクトル化）
+│   └── range_parser.py     # レンジキーのパース・展開
 ├── templates/
 │   ├── base.html           # 共通レイアウト
 │   ├── index.html          # トップページ
-│   └── stack_calculator.html
+│   ├── stack_calculator.html
+│   └── equity_calculator.html
 ├── static/
+│   ├── css/
+│   │   └── equity_calculator.css
 │   └── js/
 │       ├── base.js         # ハンバーガーメニュー
-│       └── stack_calculator.js
+│       ├── stack_calculator.js
+│       └── equity_calculator.js
+├── tests/
+│   ├── test_app.py
+│   ├── test_calculator.py
+│   ├── test_evaluator.py
+│   └── test_range_parser.py
 ├── Dockerfile
 ├── template.yaml           # SAM テンプレート
 ├── samconfig.toml          # SAM デプロイ設定

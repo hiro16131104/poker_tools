@@ -26,6 +26,25 @@ endblock %} {% block content %}
         BB換算・M値をリアルタイムで計算し、戦略的判断をサポート。
       </p>
     </a>
+    <!-- エクイティ計算機 -->
+    <a
+      href="{{ url_for('equity_calculator') }}"
+      class="block bg-white rounded-xl border border-gray-200 shadow-sm p-4 hover:shadow-md hover:border-indigo-300 transition-all group"
+    >
+      <div
+        class="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center mb-2"
+      >
+        <span class="text-green-700 font-bold text-sm">EQ</span>
+      </div>
+      <h2
+        class="font-bold text-gray-800 mb-1 group-hover:text-indigo-700 transition-colors"
+      >
+        エクイティ計算機
+      </h2>
+      <p class="text-sm text-gray-500">
+        ハンドとレンジを入力し、エクイティ・勝率・チョップ率をモンテカルロ法で計算。
+      </p>
+    </a>
   </div>
 </div>
 {% endblock %}

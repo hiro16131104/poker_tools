@@ -12,7 +12,9 @@ dependencies = [
     "gunicorn (>=25.1.0,<26.0.0)",
     "flake8 (>=7.3.0,<8.0.0)",
     "black (>=26.3.1,<27.0.0)",
-    "isort (>=8.0.1,<9.0.0)"
+    "isort (>=8.0.1,<9.0.0)",
+    "numpy (>=2.4.3,<3.0.0)",
+    "pytest (>=9.0.2,<10.0.0)"
 ]
 
 
@@ -29,6 +31,7 @@ profile = "black"
 [tool.flake8]
 max-line-length = 88
 exclude = [".venv"]
+extend-ignore = ["E203"]
 
 [dependency-groups]
 dev = [
