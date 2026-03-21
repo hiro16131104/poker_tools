@@ -1,0 +1,182 @@
+/* ── ハンドレンジ選択グリッド ── */
+.range-cell {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  font-size: 0.8rem;
+  line-height: 1;
+  border: 1px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  transition: background-color 0.05s;
+  aspect-ratio: 1 / 1;
+}
+.range-cell.selected {
+  background-color: #4f46e5;
+  color: #fff;
+  border-color: #4338ca;
+}
+.range-cell.drag-preview {
+  background-color: #818cf8;
+  color: #fff;
+  border-color: #6366f1;
+}
+.range-cell.suited {
+  background-color: #eff6ff;
+}
+.range-cell.offsuit {
+  background-color: #fff7ed;
+}
+.range-cell.pair {
+  background-color: #f0fdf4;
+}
+.range-cell.selected.suited,
+.range-cell.selected.offsuit,
+.range-cell.selected.pair {
+  background-color: #4f46e5;
+}
+.range-cell.drag-preview.suited,
+.range-cell.drag-preview.offsuit,
+.range-cell.drag-preview.pair {
+  background-color: #818cf8;
+}
+
+/* モバイル: セルを詰めて表示 */
+@media (max-width: 767px) {
+  .range-cell {
+    font-size: 0.72rem;
+  }
+}
+
+/* スマホ用レンジプレビュー */
+.range-preview-cell {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  line-height: 1;
+}
+.range-preview-cell.suited {
+  background-color: #eff6ff;
+}
+.range-preview-cell.offsuit {
+  background-color: #fff7ed;
+}
+.range-preview-cell.pair {
+  background-color: #f0fdf4;
+}
+.range-preview-cell.selected.suited,
+.range-preview-cell.selected.offsuit,
+.range-preview-cell.selected.pair {
+  background-color: #4f46e5;
+  color: #fff;
+}
+
+/* ── カード選択モーダル ── */
+.card-btn {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.1s;
+  background: #fff;
+  padding: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  line-height: 1;
+}
+.card-btn .cb-rank {
+  font-size: 1rem;
+}
+.card-btn .cb-suit {
+  font-size: 0.75rem;
+}
+@media (max-width: 767px) {
+  .card-btn .cb-rank {
+    font-size: 0.85rem;
+  }
+  .card-btn .cb-suit {
+    font-size: 0.65rem;
+  }
+}
+.card-btn:hover:not(:disabled) {
+  border-color: #4f46e5;
+  background: #eef2ff;
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+.card-btn.selected {
+  background: #4f46e5;
+  color: #fff !important;
+  border-color: #4338ca;
+}
+.card-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.card-btn.spade {
+  color: #111827;
+}
+.card-btn.heart {
+  color: #dc2626;
+}
+.card-btn.diamond {
+  color: #2563eb;
+}
+.card-btn.club {
+  color: #16a34a;
+}
+
+/* 選択済みカードの表示欄 */
+.card-slot {
+  width: 2.8rem;
+  height: 3.8rem;
+  border: 2px dashed #d1d5db;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #fff;
+  line-height: 1;
+}
+.card-slot .cs-rank {
+  font-size: 1rem;
+}
+.card-slot .cs-suit {
+  font-size: 0.75rem;
+}
+.card-slot:hover {
+  border-color: #4f46e5;
+  background: #eef2ff;
+}
+.card-slot.filled {
+  border-style: solid;
+  border-color: #4f46e5;
+}
+.card-slot.spade {
+  color: #111827;
+}
+.card-slot.heart {
+  color: #dc2626;
+}
+.card-slot.diamond {
+  color: #2563eb;
+}
+.card-slot.club {
+  color: #16a34a;
+}

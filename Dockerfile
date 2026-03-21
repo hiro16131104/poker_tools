@@ -24,6 +24,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py ./
 COPY templates/ ./templates/
 COPY static/ ./static/
+COPY equity/ ./equity/
 
 # Lambda Web Adapter の設定
 # PORT: アプリが Listen するポート（LWA がリクエストを転送する先）

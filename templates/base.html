@@ -52,6 +52,11 @@
               class="text-sm text-gray-300 hover:text-white transition-colors"
               >スタック計算機</a
             >
+            <a
+              href="{{ url_for('equity_calculator') }}"
+              class="text-sm text-gray-300 hover:text-white transition-colors"
+              >エクイティ計算機</a
+            >
           </div>
           <!-- モバイル: ハンバーガーボタン -->
           <button
@@ -100,6 +105,11 @@
             href="{{ url_for('stack_calculator') }}"
             class="block text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-md px-3 py-2 transition-colors"
             >スタック計算機</a
+          >
+          <a
+            href="{{ url_for('equity_calculator') }}"
+            class="block text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded-md px-3 py-2 transition-colors"
+            >エクイティ計算機</a
           >
         </div>
       </nav>

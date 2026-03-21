@@ -17,13 +17,22 @@ set -euo pipefail
 
 # ── 引数チェック ────────────────────────────────────────────────
 ENV="${1:-}"
+SKIP_TESTS=false
+
+# オプション解析（--skip-tests）
+for arg in "$@"; do
+    if [[ "$arg" == "--skip-tests" ]]; then
+        SKIP_TESTS=true
+    fi
+done
 
 if [[ "$ENV" != "local" && "$ENV" != "dev" && "$ENV" != "prod" ]]; then
     echo "Error: 環境を指定してください。"
     echo ""
-    echo "Usage: $0 <local|dev|prod>"
+    echo "Usage: $0 <local|dev|prod> [--skip-tests]"
     echo "  例:  $0 local"
     echo "  例:  $0 dev"
+    echo "  例:  $0 dev --skip-tests"
     echo "  例:  $0 prod"
     exit 1
 fi
@@ -41,6 +50,14 @@ echo ""
 echo "[0/2] flake8 を実行..."
 poetry run flake8 .
 echo "      OK"
+echo ""
+if [[ "$SKIP_TESTS" == "true" ]]; then
+    echo "[0/2] pytest をスキップ（--skip-tests）"
+else
+    echo "[0/2] pytest を実行..."
+    poetry run pytest
+    echo "      OK"
+fi
 echo ""
 
 # ── ローカル起動 ─────────────────────────────────────────────────
