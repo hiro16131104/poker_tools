@@ -16,6 +16,11 @@ COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 /lambda-adapter /opt
 
 WORKDIR /app
 
+# OS のセキュリティパッチを適用してからキャッシュを削除する
+RUN apt-get update && \
+    apt-get upgrade -y --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
+
 # 依存関係のインストール
 COPY --from=builder /app/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
@@ -35,5 +40,6 @@ ENV AWS_LWA_READINESS_CHECK_PATH=/
 EXPOSE 8080
 
 # workers=1, threads=8: Lambda の同時実行モデルに適した設定
-# timeout=0: Lambda 側でタイムアウトを管理するため Gunicorn 側は無効化
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "1", "--threads", "8", "--timeout", "0", "app:app"]
+# timeout=28: Lambda のタイムアウト（30 秒）より短く設定し、正常なシャットダウンを保証する
+# worker-tmp-dir を省略することで、Lambda の書き込み可能領域 /tmp をデフォルトとして使用する
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "1", "--threads", "8", "--timeout", "28", "app:app"]

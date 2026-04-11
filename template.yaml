@@ -27,11 +27,28 @@ Globals:
 # ==============================================================
 Resources:
 
+  # ── Lambda 実行ロール（最小権限）────────────────────────────
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "poker-tools-lambda-role-${Environment}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        # CloudWatch Logs への書き込み権限のみ付与する
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
   # ── Lambda 関数 ──────────────────────────────────────────────
   PokerToolsFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub "poker-tools-${Environment}"
+      Role: !GetAtt LambdaExecutionRole.Arn
       PackageType: Image
       Environment:
         Variables:
@@ -59,6 +76,29 @@ Resources:
       DockerContext: ./
       Dockerfile: Dockerfile
 
+  # ── ウォームアップ用 EventBridge スケジュール ─────────────────
+  WarmupSchedule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub "poker-tools-warmup-${Environment}"
+      Description: Lambdaのコールドスタートを防ぐための定期ウォームアップ
+      ScheduleExpression: "rate(5 minutes)"
+      State: !If [IsProd, ENABLED, DISABLED]
+      Targets:
+        - Arn: !GetAtt PokerToolsFunction.Arn
+          Id: WarmupTarget
+          # Lambda Web Adapter が解釈できる API Gateway v1 プロキシイベント形式
+          Input: '{"version":"1.0","resource":"/","path":"/","httpMethod":"GET","headers":{},"queryStringParameters":null,"body":null,"isBase64Encoded":false}'
+
+  # EventBridge が Lambda を呼び出すための権限
+  WarmupPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt PokerToolsFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt WarmupSchedule.Arn
+
   # ── CloudWatch Logs（ログ保持期間を明示管理）────────────────
   PokerToolsLogGroup:
     Type: AWS::Logs::LogGroup
@@ -74,36 +114,6 @@ Resources:
       StageName: !Ref Environment
       EndpointConfiguration:
         Type: REGIONAL
-      # ── (将来) Route53 カスタムドメイン設定 ─────────────────
-      # Route53 でドメインを関連付ける場合は以下のリソースを追加:
-      #
-      # 1. ACM 証明書（ap-northeast-1 リージョンで発行）
-      #    Type: AWS::CertificateManager::Certificate
-      #
-      # 2. API Gateway カスタムドメイン名
-      #    Type: AWS::ApiGateway::DomainName
-      #    Properties:
-      #      DomainName: poker-tools.example.com  （または dev.poker-tools.example.com）
-      #      RegionalCertificateArn: !Ref Certificate
-      #      EndpointConfiguration:
-      #        Types: [REGIONAL]
-      #
-      # 3. API マッピング
-      #    Type: AWS::ApiGateway::BasePathMapping
-      #    Properties:
-      #      DomainName: !Ref CustomDomain
-      #      RestApiId: !Ref PokerToolsApi
-      #      Stage: !Ref Environment
-      #
-      # 4. Route53 レコード（エイリアス）
-      #    Type: AWS::Route53::RecordSet
-      #    Properties:
-      #      HostedZoneId: <HostedZoneId>
-      #      Name: poker-tools.example.com
-      #      Type: A
-      #      AliasTarget:
-      #        DNSName: !GetAtt CustomDomain.RegionalDomainName
-      #        HostedZoneId: !GetAtt CustomDomain.RegionalHostedZoneId
 
 # ==============================================================
 # 条件

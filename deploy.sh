@@ -168,3 +168,18 @@ API_URL=$(aws cloudformation describe-stacks \
 
 echo "  API URL: ${API_URL}"
 echo "======================================================"
+
+# ── ウォームアップ ───────────────────────────────────────────────
+# デプロイ直後のコールドスタートを防ぐため、Lambdaを即時呼び出す
+FUNCTION_NAME="poker-tools-${ENV}"
+echo ""
+echo "Lambda をウォームアップ中: ${FUNCTION_NAME}..."
+
+aws lambda invoke \
+    --function-name "${FUNCTION_NAME}" \
+    --region "${REGION}" \
+    --payload '{"version":"1.0","resource":"/","path":"/","httpMethod":"GET","headers":{},"queryStringParameters":null,"body":null,"isBase64Encoded":false}' \
+    --cli-binary-format raw-in-base64-out \
+    /dev/null > /dev/null
+
+echo "      OK"

@@ -8,6 +8,9 @@
       name="description"
       content="{% block description %}ポーカープレイヤーのための便利ツール集。BB換算・M値計算など、テーブルでの戦略的判断をサポートします。{% endblock %}"
     />
+    {% if app_env == "dev" %}
+    <meta name="robots" content="noindex, nofollow" />
+    {% endif %}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

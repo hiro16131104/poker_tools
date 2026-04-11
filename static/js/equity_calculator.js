@@ -108,7 +108,7 @@ function suitOf(cs) { return cs ? cs[1] : null; }
 function renderSlot(el, cs) {
   if (!cs) {
     // 未選択状態にリセットする
-    el.innerHTML = '?';
+    el.textContent = '?';
     el.className = el.className.replace(/\s*(spade|heart|diamond|club|filled)/g, '');
     el.classList.remove('filled');
   } else {
@@ -116,8 +116,16 @@ function renderSlot(el, cs) {
     const suit = suitOf(cs);
     el.className = el.className.replace(/\s*(spade|heart|diamond|club)/g, '');
     el.classList.add(SUIT_CLASS[suit], 'filled');
-    // ランクを上・スートを下に並べる
-    el.innerHTML = `<span class="cs-rank">${cs[0]}</span><span class="cs-suit">${SUIT_SYMBOLS[suit]}</span>`;
+    // ランクを上・スートを下に並べる（innerHTML の代わりに DOM 操作で XSS を防止）
+    el.textContent = '';
+    const rankSpan = document.createElement('span');
+    rankSpan.className = 'cs-rank';
+    rankSpan.textContent = cs[0];
+    const suitSpan = document.createElement('span');
+    suitSpan.className = 'cs-suit';
+    suitSpan.textContent = SUIT_SYMBOLS[suit];
+    el.appendChild(rankSpan);
+    el.appendChild(suitSpan);
   }
 }
 
