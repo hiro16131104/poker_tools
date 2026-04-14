@@ -3,6 +3,8 @@ import os
 
 from flask import Flask, jsonify, render_template, request
 
+from equity.calculator import calculate_equity
+
 app = Flask(__name__)
 
 # ── ロギング設定 ──────────────────────────────────────────────────────────
@@ -77,8 +79,6 @@ def equity_calculator():
 
 @app.route("/equity-calculator/calculate", methods=["POST"])
 def equity_calculator_calculate():
-    from equity.calculator import calculate_equity
-
     data = request.get_json(silent=True)
     if not data:
         logger.warning(
